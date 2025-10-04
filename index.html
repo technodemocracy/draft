@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gouvernance Numérique Horizontale (Sélective) — Prototype</title>
+  <meta name="description" content="Une landing page tout-en-un (HTML+CSS+JS) pour un système de gouvernance numérique horizontal-sélectif, démarrant par Discord et évolutif." />
+  <style>
+    :root{
+      --bg-1: 260 90% 60%; /* sera écrasé au chargement */
+      --bg-2: 200 90% 55%; /* sera écrasé au chargement */
+      --glass: 0 0% 100% / .1;
+      --ink: 220 18% 18%;
+      --ink-2: 220 12% 28%;
+      --ink-3: 220 10% 40%;
+      --mute: 220 10% 60%;
+      --accent: 280 90% 60%;
+      --ok: 150 70% 45%;
+      --warn: 45 95% 50%;
+      --bad: 0 85% 55%;
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --shadow-1: 0 10px 30px rgba(0,0,0,.12);
+      --shadow-2: 0 30px 60px rgba(0,0,0,.18);
+    }
+
+    /* Reset minimal et typographie */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; color: hsl(var(--ink)); background:#0b0b0c; font: 16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      background-image: radial-gradient(1200px 600px at 30% -10%, hsla(var(--bg-1)/.25), transparent 60%),
+                        radial-gradient(1000px 500px at 80% 10%, hsla(var(--bg-2)/.25), transparent 60%),
+                        linear-gradient(135deg, hsl(var(--bg-1)) -10%, hsl(var(--bg-2)) 110%);
+      background-attachment: fixed;
+      transition: background 600ms ease;
+    }
+
+    .grid{display:grid; gap:1.25rem}
+    .container{width:min(1120px, 92%); margin-inline:auto}
+
+    header.nav{
+      position:sticky; top:0; z-index:50; backdrop-filter: blur(8px);
+      background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.25));
+      box-shadow: var(--shadow-1);
+      border-bottom: 1px solid rgba(255,255,255,.35);
+    }
+    .nav-inner{display:flex; align-items:center; justify-content:space-between; padding: .65rem 0}
+    .brand{display:flex; gap:.75rem; align-items:center; font-weight:800; letter-spacing:.2px}
+    .brand .logo{width:36px; aspect-ratio:1; border-radius:12px; background: conic-gradient(from 0deg, hsl(var(--bg-1)), hsl(var(--bg-2))); box-shadow: var(--shadow-1)}
+    .nav a{color:hsl(var(--ink)); text-decoration:none; font-weight:600; opacity:.85}
+    .nav a:hover{opacity:1}
+    .nav ul{display:flex; gap:1rem; list-style:none; padding:0; margin:0}
+
+    .hero{
+      padding: 7rem 0 4rem; color:#0b0b0c;
+    }
+    .hero .card{
+      background: rgba(255,255,255,.78); border:1px solid rgba(255,255,255,.6);
+      border-radius: var(--radius-xl); box-shadow: var(--shadow-2);
+      padding: clamp(1.2rem, 3.5vw, 2rem);
+      overflow: hidden; position:relative;
+    }
+    .hero h1{
+      font-size: clamp(2rem, 3.8vw, 3.4rem); line-height:1.1; margin:0 0 .6rem; letter-spacing:.2px;
+    }
+    .hero p.lead{font-size: clamp(1.05rem, 2vw, 1.25rem); color:hsl(var(--ink-3)); margin:0}
+    .pill{display:inline-flex; gap:.5rem; align-items:center; padding:.4rem .8rem; border-radius:999px; background:hsla(0 0% 100% / .6); border:1px solid rgba(255,255,255,.55); font-weight:700; box-shadow: var(--shadow-1)}
+
+    .cta{display:flex; flex-wrap:wrap; gap:.75rem; margin-top:1.1rem}
+    .btn{
+      appearance:none; border:0; cursor:pointer; font-weight:800; letter-spacing:.3px;
+      padding:.85rem 1.1rem; border-radius: 14px; box-shadow: var(--shadow-1);
+      transition: transform .08s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .btn.primary{background:#0b0b0c; color:white}
+    .btn.ghost{background:rgba(255,255,255,.6)}
+    .btn:hover{transform: translateY(-1px); box-shadow: var(--shadow-2)}
+
+    section{scroll-margin-top:80px}
+    .section{
+      margin: 2.5rem 0; 
+    }
+
+    .glass{
+      background: hsla(var(--glass)); border:1px solid rgba(255,255,255,.45);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-1);
+      padding: clamp(1rem, 2.4vw, 1.5rem);
+    }
+
+    h2{font-size: clamp(1.5rem, 2.6vw, 2.15rem); margin: 0 0 .4rem}
+    h3{font-size: clamp(1.1rem, 2.2vw, 1.35rem); margin: .6rem 0 .2rem}
+    p{margin:.4rem 0}
+    .muted{color:hsl(var(--ink-3))}
+    .tag{display:inline-block; font-size:.8rem; padding:.25rem .55rem; border-radius:999px; background:rgba(0,0,0,.06); margin:.15rem 0}
+
+    .cards{display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:1rem}
+    .card{
+      background: rgba(255,255,255,.92); border:1px solid rgba(255,255,255,.7);
+      border-radius: var(--radius-lg); padding:1rem; box-shadow: var(--shadow-1);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .card:hover{transform: translateY(-3px); box-shadow: var(--shadow-2)}
+
+    .timeline{position:relative; padding-left:1rem}
+    .timeline::before{content:""; position:absolute; left:.35rem; top:0; bottom:0; width:2px; background: rgba(255,255,255,.7)}
+    .tl-item{position:relative; margin:.8rem 0 1rem .35rem; padding-left:1rem}
+    .tl-item::marker{content:""}
+    .tl-item::before{content:""; position:absolute; left:-.4rem; top:.35rem; width:.7rem; height:.7rem; border-radius:50%; background: #0b0b0c; box-shadow: 0 0 0 4px rgba(255,255,255,.65)}
+
+    .checks{display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:.75rem}
+    .check{display:flex; gap:.6rem; align-items:flex-start}
+
+    /* Accordéons FAQ */
+    details{background: rgba(255,255,255,.9); border:1px solid rgba(255,255,255,.7); border-radius: 12px; padding:.8rem 1rem}
+    details + details{margin-top:.6rem}
+    details[open]{box-shadow: var(--shadow-1)}
+    summary{cursor:pointer; font-weight:700}
+    summary::marker{content:""}
+
+    /* Animations de révélation */
+    .reveal{opacity:0; transform: translateY(10px); transition: opacity .6s ease, transform .6s ease}
+    .reveal.show{opacity:1; transform:none}
+
+    /* Footer */
+    footer{margin:3rem 0 4rem; color:hsl(var(--ink-3)); text-align:center}
+
+    /* Badge flottant mobile */
+    .float-badge{position: fixed; right:.8rem; bottom:.8rem; background: rgba(255,255,255,.9); border:1px solid rgba(255,255,255,.7); border-radius: 999px; padding:.5rem .9rem; font-size:.9rem; box-shadow: var(--shadow-1)}
+
+    /* Petites touches visuelles */
+    .chip{display:inline-flex; align-items:center; gap:.4rem; background:rgba(0,0,0,.06); padding:.35rem .6rem; border-radius:999px; font-weight:700; font-size:.8rem}
+    .chip.ok{background: hsla(150 70% 45% / .12)}
+    .chip.warn{background: hsla(45 95% 50% / .15)}
+
+    /* Code blocks */
+    pre{background: #0b0b0c; color: #eaeaea; border-radius: 12px; padding:1rem; overflow:auto; border:1px solid rgba(255,255,255,.3)}
+    code{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace}
+
+    /* Responsive paddings */
+    .pad{padding: clamp(1rem, 3vw, 1.5rem)}
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="container nav-inner">
+      <div class="brand"><div class="logo" aria-hidden="true"></div><span>Proto<span style="opacity:.65">Gov</span></span></div>
+      <nav class="nav">
+        <ul>
+          <li><a href="#vision">Vision</a></li>
+          <li><a href="#discord">Discord → Plateforme</a></li>
+          <li><a href="#controles">Contrôles d'entrée</a></li>
+          <li><a href="#votes">Votes importants</a></li>
+          <li><a href="#protos">Prototypes existants</a></li>
+          <li><a href="#roadmap">Feuille de route</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero container">
+      <div class="card reveal">
+        <div class="pill">100% numérique • Horizontalité sélective</div>
+        <h1>Construisons une gouvernance numérique <em>horizontale… quand ça compte</em>.</h1>
+        <p class="lead">Un système où tout le monde peut proposer, débattre et voter — mais où l’horizontalité s’active surtout pour les décisions souveraines (ex. gouvernement). Démarrage sur Discord, puis migration progressive vers une plateforme dédiée.</p>
+        <div class="cta">
+          <a class="btn primary" href="#discord">Démarrer sur Discord</a>
+          <a class="btn ghost" href="#protos">Explorer les prototypes</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="vision" class="section container grid reveal">
+      <div class="glass">
+        <h2>Vision & principes</h2>
+        <p>Notre approche évite la hiérarchie par défaut mais l’active <strong>là où l’efficacité l’exige</strong>. Les votes réellement structurants activent une horizontalité stricte (une personne = une voix, règles renforcées), tandis que les opérations quotidiennes restent déléguées et agiles.</p>
+        <div class="checks">
+          <div class="check"><span class="chip ok">Transparence</span><p>Journal public des propositions, débats, résultats et implémentations.</p></div>
+          <div class="check"><span class="chip ok">Inclusion</span><p>Accès mobile, expérience low‑bandwidth, assistance progressive.</p></div>
+          <div class="check"><span class="chip warn">Sobriété</span><p>Limiter la fatigue décisionnelle via filtres, délégation révocable et agendas thématiques.</p></div>
+          <div class="check"><span class="chip ok">Sécurité</span><p>Identité numérique vérifiable, preuves anti‑doublons, respect de la vie privée.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="discord" class="section container grid reveal">
+      <div class="card">
+        <h2>Démarrage sur Discord → évolution vers plateforme dédiée</h2>
+        <ol class="timeline">
+          <li class="tl-item"><strong>Phase 0 — Serveur Discord</strong><br>Canaux thématiques (propositions, débat, amendements, annonces). Bots pour formats standardisés (gabarits), réactions‑sondages et modération.</li>
+          <li class="tl-item"><strong>Phase 1 — Contrôles d’entrée</strong><br>Vérification douce (e‑mail, téléphone), puis renforcement (preuve d’unicité, attestations sociales). Listes d’accès par canal.</li>
+          <li class="tl-item"><strong>Phase 2 — Passerelles de vote</strong><br>Bot « /consulter » pour ouvrir un vote externe (jugement majoritaire, classement, majorité qualifiée). Résultats publiés et ancrés.</li>
+          <li class="tl-item"><strong>Phase 3 — Plateforme</strong><br>Migration progressive vers une app web : dépôt, débat structuré, amendements versionnés, vote sécurisé, exécution automatisée.</li>
+        </ol>
+        <div class="grid" style="grid-template-columns:1.1fr .9fr">
+          <div>
+            <h3>Architecture logique</h3>
+            <ul>
+              <li><strong>Front</strong> : Web app PWA (mobile‑first), intégration Discord OAuth2.</li>
+              <li><strong>Identité</strong> : eID/SSI, preuve d’unicité (proof‑of‑personhood), attestations communautaires.</li>
+              <li><strong>Vote</strong> : modules MJ (jugement majoritaire), Condorcet, majorité qualifiée, quorum.</li>
+              <li><strong>Ledger</strong> : journal immuable (ancrage périodique sur chaîne publique ou hash server‑side).</li>
+              <li><strong>Exec</strong> : « smart rules » — règles automatisées (pas forcément blockchain) qui déclenchent des actions.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Exemple de flux (pseudo‑code)</h3>
+            <pre><code>// 1) Une proposition naît sur #propositions
+onMessage('#propositions', (msg) =&gt; createDraft(msg.author, msg.content))
+
+// 2) Le bot valide le gabarit et demande les impacts
+validateDraft(draft)
+  .then(requestAmendments)
+  .then(openDebateWindow)
+
+// 3) À l’issue, on déclenche le vote externe sécurisé
+if (isMajorDecision(draft)) openMajorVote(draft, method='MJ', quorum=0.4)
+else openOperationalVote(draft, method='ranked')
+
+// 4) Résultats et exécution
+anchorResults(draft.id, results.hash)
+if (results.approved) triggerSmartRule(draft)
+            </code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="controles" class="section container grid reveal">
+      <div class="glass">
+        <h2>Contrôles d’entrée par canal (anti‑bots, anti‑doublons, anti‑abus)</h2>
+        <div class="cards">
+          <div class="card">
+            <h3>Vérification progressive</h3>
+            <p>Accès échelonné : visiteur → membre vérifié → membre votant. Chaque rôle dépend des preuves détenues.</p>
+            <ul>
+              <li>Étape 1 : e‑mail + mobile</li>
+              <li>Étape 2 : preuve d’unicité (selfie liveness, rendez‑vous, ou badge local)</li>
+              <li>Étape 3 : attestations pair‑à‑pair (web‑of‑trust), révocables</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Listes d’accès par « discours »/canal</h3>
+            <p>Chaque canal Discord (« discours ») dispose d’un <em>gatekeeper</em> : règles d’entrée, délai minimal avant vote, score de réputation plafonné.</p>
+            <p class="muted">Objectif : encourager la qualité, réduire le brigading, préserver l’inclusion.</p>
+          </div>
+          <div class="card">
+            <h3>Protection vie privée</h3>
+            <p>Stocker des <strong>preuves</strong> (hash, attestations anonymisées), pas des données brutes. Révélation sélective selon le canal.</p>
+          </div>
+          <div class="card">
+            <h3>Modération distribuée</h3>
+            <p>Jury tournant tiré au sort parmi les membres vérifiés (mandat court, révocable) pour trancher les litiges rapidement.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="votes" class="section container grid reveal">
+      <div class="card">
+        <h2>Votes importants (horizontalité stricte)</h2>
+        <p>Les décisions souveraines — constitution, gouvernement, budget, adhésion/expulsion d’entités, règles électorales — activent un mode « pleinement horizontal » :</p>
+        <div class="checks">
+          <div class="check"><span class="chip ok">Une personne = une voix</span><p>Identité vérifiée, anti‑doublons, secret du vote garanti.</p></div>
+          <div class="check"><span class="chip ok">Méthodes robustes</span><p>Jugement majoritaire par défaut, alternatives (Condorcet, majorité qualifiée) selon la nature du texte.</p></div>
+          <div class="check"><span class="chip ok">Quorum & délais</span><p>Seuils de participation, fenêtres de vote multi‑jours, rappel doux (opt‑in).</p></div>
+          <div class="check"><span class="chip ok">Traçabilité</span><p>Ancrage des bulletins chiffrés et des résultats agrégés, preuves d’intégrité publiques.</p></div>
+        </div>
+        <h3>Délégation révocable (opérationnel)</h3>
+        <p>Pour les décisions quotidiennes, les membres peuvent déléguer temporairement leurs voix à des mandataires par domaine (économie, éducation, tech). Délégation visible, <strong>révocable à tout moment</strong>.</p>
+      </div>
+    </section>
+
+    <section id="protos" class="section container grid reveal">
+      <div class="glass">
+        <h2>Panorama — prototypes & outils existants</h2>
+        <p class="muted">Inspiration, pas copie conforme. Chaque brique peut être remplacée.</p>
+        <div class="cards">
+          <div class="card">
+            <h3>Decidim</h3>
+            <p>Plateforme de participation open‑source (propositions, débats, budgets participatifs, votes). Excellente pour la traçabilité et les parcours citoyens.</p>
+          </div>
+          <div class="card">
+            <h3>Loomio</h3>
+            <p>Outil de délibération asynchrone avec fils clairs et prises de décision simples. Idéal pour des collectifs.</p>
+          </div>
+          <div class="card">
+            <h3>DemocracyOS</h3>
+            <p>Application centrée sur la discussion et le vote sur des projets de loi. Minimaliste et pédagogique.</p>
+          </div>
+          <div class="card">
+            <h3>Polis</h3>
+            <p>Cartographie d’opinions à grande échelle : visualise les consensus émergents sans débats infinis.</p>
+          </div>
+          <div class="card">
+            <h3>Aragon / DAOstack</h3>
+            <p>Cadres pour organisations on‑chain : propositions, permissions, votes, trésorerie et exécution programmée.</p>
+          </div>
+          <div class="card">
+            <h3>OpenGov + MJ</h3>
+            <p>Implémentations du <em>jugement majoritaire</em> avec interfaces compréhensibles, adaptées aux votes sensibles.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="roadmap" class="section container grid reveal">
+      <div class="card">
+        <h2>Feuille de route (indicative)</h2>
+        <ol class="timeline">
+          <li class="tl-item"><strong>S1 — Kit Discord</strong> : gabarits, bots, règles de canal, tableau de bord de propositions.</li>
+          <li class="tl-item"><strong>S2 — Identité & preuves</strong> : vérification progressive, anti‑doublons, attestations pair‑à‑pair.</li>
+          <li class="tl-item"><strong>S3 — Passerelles de vote</strong> : modules MJ/Condorcet, quorum, ancrage des résultats.</li>
+          <li class="tl-item"><strong>S4 — Plateforme</strong> : PWA, débat structuré, versioning d’amendements, exécution de règles.</li>
+          <li class="tl-item"><strong>S5 — Scalabilité</strong> : gouvernance multi‑domaines, délégation révocable, API publiques.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="avantages" class="section container grid reveal">
+      <div class="glass">
+        <h2>Avantages & opportunités</h2>
+        <div class="cards">
+          <div class="card">
+            <h3>Vitesse & inclusion</h3>
+            <p>Consultations rapides, accessibles depuis le mobile, avec traductions et résumés assistés.</p>
+          </div>
+          <div class="card">
+            <h3>Qualité délibérative</h3>
+            <p>Amendements versionnés, gabarits d’impact, vote par appréciation pour capter la nuance sans polariser.</p>
+          </div>
+          <div class="card">
+            <h3>Crédibilité</h3>
+            <p>Journal public immuable, preuves d’intégrité, publication des métriques de participation.</p>
+          </div>
+          <div class="card">
+            <h3>Interopérabilité</h3>
+            <p>Intégrations Discord, Matrix, eID, wallets, registres publics, SIG pour budgets & investissements.</p>
+          </div>
+          <div class="card">
+            <h3>Résilience</h3>
+            <p>Modération distribuée, mirroring de données, backups chiffrés, procédures de continuité.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" class="section container grid reveal">
+      <div class="card">
+        <h2>FAQ</h2>
+        <details>
+          <summary>Pourquoi l’horizontalité seulement pour les « grands » votes ?</summary>
+          <p>Parce qu’elle exige du temps et des garanties fortes. Pour rester efficace, on délègue l’opérationnel à des mandats courts et révocables.</p>
+        </details>
+        <details>
+          <summary>Comment éviter les doublons d’identité sans violer la vie privée ?</summary>
+          <p>Par des preuves d’unicité (liveness), des attestations de pairs et des ancrages de hash. Les données brutes restent chez l’utilisateur.</p>
+        </details>
+        <details>
+          <summary>Doit‑on utiliser une blockchain ?</summary>
+          <p>Pas forcément. Un journal append‑only avec ancrage périodique (hash) sur une chaîne publique suffit souvent pour la vérifiabilité.</p>
+        </details>
+        <details>
+          <summary>Et si la participation baisse ?</summary>
+          <p>Agenda clair, notifications opt‑in, résumés, délais confortables, délégation granulaire et rattrapage asynchrone.</p>
+        </details>
+      </div>
+    </section>
+
+    <footer class="container">
+      <p>© ProtoGov — Prototype éducatif, 100% HTML/CSS/JS. Aucune donnée collectée.</p>
+    </footer>
+  </main>
+
+  <div class="float-badge" id="badge">Fond aléatoire : actif</div>
+
+  <script>
+    // --- Couleur de fond aléatoire à chaque rechargement (mobile-friendly) ---
+    (function randomBackground(){
+      const hueA = Math.floor(Math.random()*360);
+      const hueB = (hueA + 60 + Math.floor(Math.random()*180)) % 360; // contraste assuré
+      const satA = 75 + Math.floor(Math.random()*20);
+      const satB = 70 + Math.floor(Math.random()*25);
+      const lightA = 45 + Math.floor(Math.random()*12);
+      const lightB = 50 + Math.floor(Math.random()*12);
+      document.documentElement.style.setProperty('--bg-1', `${hueA} ${satA}% ${lightA}%`);
+      document.documentElement.style.setProperty('--bg-2', `${hueB} ${satB}% ${lightB}%`);
+    })();
+
+    // --- Révélations au scroll ---
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('show'); })
+    }, {threshold: .12});
+    document.querySelectorAll('.reveal').forEach(el=> io.observe(el));
+
+    // --- Micro-interactions décoratives ---
+    const badge = document.getElementById('badge');
+    let t=0; setInterval(()=>{ t+=1; badge.style.transform = `translateY(${Math.sin(t/8)*3}px)`; }, 60);
+
+    // --- Ancre douce ---
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', e=>{
+        const id=a.getAttribute('href');
+        const el=document.querySelector(id);
+        if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth', block:'start'}); }
+      });
+    });
+
+    // --- Démonstrateur d’un petit « vote MJ » local (UI purement illustrative) ---
+    (function demoMJ(){
+      const demoHTML = `
+        <div class="card" style="margin-top:1rem">
+          <h3>Démo locale — Jugement Majoritaire</h3>
+          <p class="muted">Entrez votre appréciation pour cette proposition : « Créer un budget participatif annuel ».</p>
+          <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:.5rem">
+            ${['À rejeter','Insuffisant','Passable','Assez bien','Bien','Très bien','Excellent'].map((l,i)=>`
+              <button class="btn" data-grade="${i}" style="background:rgba(0,0,0,.06)">${l}</button>
+            `).join('')}
+          </div>
+          <p id="mjRes" class="muted"></p>
+        </div>`;
+      const mount = document.querySelector('#votes .card');
+      if(mount) mount.insertAdjacentHTML('beforeend', demoHTML);
+      const grades=[];
+      mount?.querySelectorAll('[data-grade]')?.forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          grades.push(+btn.dataset.grade);
+          const median = grades.slice().sort((a,b)=>a-b)[Math.floor(grades.length/2)];
+          const labels=['À rejeter','Insuffisant','Passable','Assez bien','Bien','Très bien','Excellent'];
+          const p = document.getElementById('mjRes');
+          p.textContent = `Médiane actuelle (n=${grades.length}) : ${labels[median]} — démo locale, non persistant.`;
+        });
+      })
+    })();
+  </script>
+</body>
+</html>
